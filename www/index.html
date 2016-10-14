@@ -1,0 +1,214 @@
+<!DOCTYPE HTML>
+<html ng-app="myApp">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta http-equiv="Content-Security-Policy" content="default-src * data:; style-src * 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'">
+    <script src="components/loader.js"></script>
+    <script src="lib/angular/angular.js"></script>
+    <script src="lib/onsenui/js/onsenui.js"></script>
+    <script src="lib/onsenui/js/angular-onsenui.js"></script>
+
+    <link rel="stylesheet" href="components/loader.css">
+    <link rel="stylesheet" href="lib/onsenui/css/onsenui.css">
+    <link rel="stylesheet" href="lib/onsenui/css/onsen-css-components.css">
+    <link rel="stylesheet" href="css/style.css">
+  
+    <script>
+        //var baseUrl = "http://www.jma.go.jp/jp/g3/";
+        var ImgWeathermap = [];
+        ImgWeathermap.length = 16;
+        var WeathermapList = function(desc, path) {
+            this.desc = desc;
+            this.path = path;
+        };
+    </script>
+    <!--script src="jp_c.js"></script-->   
+    <script src="http://www.jma.go.jp/jp/g3/hisjs/jp_c.js"></script>
+    <!--script>
+        alert(ImgWeathermap[2].desc);   
+    </script-->
+    
+    <!--script src="local/ngPinchZoom.js"></script-->
+
+    
+
+
+    <script>
+        var mypop= "popover";
+        var module = angular.module("myApp", ["onsen"]);
+        //module.controller('AppController', function($scope) {
+        //var module = ons.bootstrap();
+        module.controller('AppController', function() {
+            
+            this.pushes = 0;
+            this.pops = 0;
+
+            this.clist = ImgWeathermap;
+            this.current = this.clist[2];  //[0];  
+//            alert("app ctrl:"+ this.foo + this.clist);
+
+            this.reloadRoute = function() {
+                $route.reload();
+            };
+            
+            this.showChart = function(index) {
+                this.current = this.clist[index]
+                //alert(this.current.desc);
+                navi.pushPage('page2.html'); //, this.clist[index]);     
+            };
+            
+            this.showPopover = function(e) {
+                alert("showPopover:" + this.popover);
+                mypop.show(e);
+            };
+            
+            
+            this.showPopover = function(e) {
+                //alert(mypop);
+                mypop.show(e);
+            };
+            
+            this.doPopover = function(e) {
+                if(e == "#about") {
+                    navi.pushPage("about.html");
+                }
+                else if(e == "#reload") {
+                    this.reloadRoute();
+                }
+                mypop.hide();
+            }
+            
+            ons.ready(function() {
+                ons.createPopover('popover.html').then(function(popover) {
+                    mypop = popover;
+                    //alert(mypop);
+                });
+            });
+  
+            
+            
+            
+            
+        });
+        
+    </script>
+    
+</head>
+
+<body ng-controller="AppController as app">
+    <ons-navigator
+          var="navi"
+          page="page1.html"
+          ons-postpush="app.pushes = app.pushes + 1"
+          ons-postpop="app.pops = app.pops + 1">
+    </ons-navigator>
+
+
+
+
+
+
+
+    <ons-template id="page1.html">
+        <ons-page>
+            <ons-toolbar>
+                <div class="right">
+                    <ons-toolbar-button ng-click="app.showPopover($event)"><ons-icon icon="ion-navicon"></ons-icon></ons-toolbar-button>
+                </div>
+                <div class="center">気象庁/速報天気図</div>
+                <div class="left"><ons-back-button>Back</ons-back-button></div>
+            </ons-toolbar>    
+  
+
+            <!--section style="padding: 10px"-->
+            <ons-list>
+                <ons-list-header>予想</ons-list-header>
+                <ons-list-item ng-repeat="chart in app.clist track by $index" ng-if="chart.desc.startsWith('予想')"
+                        modifier="chevron"
+                        ng-click="app.showChart($index)"
+                >
+                    <!--ons-button ng-click="app.showChart($index)">{{ chart.desc }}</ons-button-->
+                    <span>{{ chart.desc }}</span>
+                </ons-list-item>
+          
+                <ons-list-header>実況</ons-list-header>
+                    <ons-list-item ng-repeat="chart in app.clist track by $index" ng-if="chart.desc.startsWith('実況')"
+                        modifier="chevron"
+                        ng-click="app.showChart($index)"
+                        >
+                        <!--ons-button ng-click="app.showChart($index)">{{ chart.desc }}</ons-button-->
+                        <span>{{ chart.desc }}</span>
+                    </ons-list-item>
+                </ons-list>
+            <!--/section-->
+        </ons-page>
+    </ons-template>    
+
+
+
+    <ons-template  id="page2.html">    
+        <ons-page>
+            <ons-toolbar>
+                <div class="left">
+                    <ons-back-button>Back</ons-back-button>
+                </div>
+                <div class="center">{{ app.current.desc }} </div>
+            </ons-toolbar>
+
+            <!--section style="padding: 10px"-->
+            <!--div ng-app="ngPinchZoom">
+                <img src="http://www.jma.go.jp/jp/g3/{{ app.current.path }}" width="100%" ng-pinch-zoom>
+            </div-->
+            <div>
+                <img src="http://www.jma.go.jp/jp/g3/{{ app.current.path }}" width="100%">
+            </div>
+            <!--/section-->
+            
+        </ons-page>
+    </ons-template>
+    
+    
+    
+    <ons-template id="popover.html">
+        <ons-popover cancelable direction="down">
+            <ons-list>
+                <!--ons-list-item ng-click="app.doPopover('#reload')">更新</ons-list-item-->
+                <ons-list-item ng-click="app.doPopover('#about')">このプログラムについて</ons-list-item>
+            </ons-list>
+        </ons-popover>
+    </ons-template>
+ 
+ 
+ 
+    <ons-template id="about.html">
+        <ons-page>
+            <center>
+                PWS-SMA<br/>
+                <hr/>
+                Professional Weather Service<br/>
+                Simple Mobile Application<br/>
+                <hr/>
+                気象庁/速報天気図の簡易ブラウザです。<br/>
+                <a href="http://www.jma.go.jp/jp/g3/">情報提供：気象庁<br/>
+                <a href="http://www.wamwam.co.jp">開発：（株）気象海洋コンサルタント</a><br/>
+                <hr/>
+                <span><ons-button ng-click="navi.popPage()">OK</ons-button></span>
+                <br/>
+                <br/>
+                <br/>
+                <br/>
+                [Please touch JFlight]<br/>
+                <a href="http://jflight.jp"><img src="JFlogoLMono.png" width="100%"></a><br/>
+                <div>
+                エアバスA320フライトシミュレータ<br/>
+                操縦体験<br/>
+                横浜から世界の空へ<br/>
+                <font size="small">(PR:関連事業)</font>
+                </div>
+            </center>
+        </ons-page>
+    </ons-template>
+      
+</body>
+</html>
